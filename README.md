@@ -1,6 +1,6 @@
 # Django Publisher
 
-This package provides Django management commands to publish your site over SSH via Paramiko.
+This package provides Django management commands to publish your site to various instances (develop, stage, production) over SSH via Paramiko.
 
 # Installation and Setup
 
@@ -15,15 +15,21 @@ You will need to have set up an account on the destination server; add your publ
 ```python
 DJANGO_PUBLISHER_INSTANCES = {
     'develop': {
-        'repository': '',
+        'name': 'django-publisher',
+        'repository': 'git@github.com:FlipperPA/django-publisher.git',
         'branch': 'develop',
         'settings': 'config.settings.develop',
+        'virtualenv_path': '/var/django/virtualenvs',
+        'code_path': '/var/django/sites',
         'servers': ['devserver.example.com'],
     },
     'production': {
-        'repository': '',
+        'name': 'django-publisher',
+        'repository': 'git@github.com:FlipperPA/django-publisher.git',
         'branch': 'master',
         'settings': 'config.settings.master',
+        'virtualenv_path': '/var/django/virtualenvs',
+        'code_path': '/var/django/sites',
         'servers': ['prodserver1.example.com', 'prodserver2.example.com'],
     },
 }
