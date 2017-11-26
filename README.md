@@ -78,7 +78,7 @@ The `publish` command will SSH to each server in `servers` as the `server_user`,
 
 ## Known Limitations and Issues
 
-* Windows is not supported
+* Windows servers are not supported, however, you can use Windows as your control machine.
 * Your repository's host must be in your target server's known hosts list, as git checkouts over SSH require an initial fingerprint.
 * This is not meant to be a replacement for a fully featured continous integration product, like Jenkins.
 
