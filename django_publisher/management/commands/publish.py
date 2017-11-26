@@ -117,7 +117,7 @@ class Command(BaseCommand):
                 cd {virtualenv_path}
                 virtualenv --python={virtualenv_python_path} {name}-{branch}-{stamp}
                 . {name}-{branch}-{stamp}/bin/activate
-                cd {install_path}
+                cd {install_code_path_stamp}
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
                 python manage.py migrate --noinput --settings={settings}
@@ -127,7 +127,7 @@ class Command(BaseCommand):
                     name=instance['name'],
                     branch=instance['branch'],
                     stamp=stamp,
-                    install_path=os.path.join(
+                    install_code_path_stamp=os.path.join(
                         instance['code_path'],
                         '{name}-{branch}-{stamp}'.format(
                             name=instance['name'],
@@ -144,14 +144,39 @@ class Command(BaseCommand):
             print("Updating the code and virtualenv symlinks for the new publish...")
             stdin, stdout, stderr = ssh.exec_command(
                 """
-                ln -sfn {code_path}/{name}-{branch}-{stamp} {code_path}/{name}-{branch}
-                ln -sfn {virtualenv_path}/{name}-{branch}-{stamp} {virtualenv_path}/{name}-{branch}
+                ln -sfn {install_code_path_stamp} {install_code_path}
+                ln -sfn {install_virtualenv_path_stamp} {install_virtualenv_path}
                 """.format(
-                    code_path=instance['code_path'],
-                    name=instance['name'],
-                    branch=instance['branch'],
-                    stamp=stamp,
-                    virtualenv_path=instance['virtualenv_path'],
+                    install_code_path_stamp=os.path.join(
+                        instance['code_path'],
+                        '{name}-{branch}-{stamp}'.format(
+                            name=instance['name'],
+                            branch=instance['branch'],
+                            stamp=stamp,
+                        ),
+                    ),
+                    install_code_path=os.path.join(
+                        instance['code_path'],
+                        '{name}-{branch}'.format(
+                            name=instance['name'],
+                            branch=instance['branch'],
+                        ),
+                    ),
+                    install_virtualenv_path_stamp=os.path.join(
+                        instance['virtualenv_path'],
+                        '{name}-{branch}-{stamp}'.format(
+                            name=instance['name'],
+                            branch=instance['branch'],
+                            stamp=stamp,
+                        ),
+                    ),
+                    install_virtualenv_path=os.path.join(
+                        instance['virtualenv_path'],
+                        '{name}-{branch}'.format(
+                            name=instance['name'],
+                            branch=instance['branch'],
+                        ),
+                    ),
                 )
             )
             self.command_output(stdout, stderr, quiet)
