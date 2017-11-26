@@ -1,16 +1,17 @@
 from setuptools import setup, find_packages
 setup(
-    name='django-deployer',
+    name='django-ssh-deployer',
     version="0.1dev0",
     description='This package provides Django management commands to deploy your site over SSH via Paramiko.',
     long_description='This package provides Django management commands to deploy your site over SSH via Paramiko.',
     author='Tim Allen',
     author_email='tim@pyphilly.org',
-    url='https://github.com/FlipperPA/django-deployer',
+    url='https://github.com/FlipperPA/django-ssh-deployer',
     include_package_data=True,
     packages=find_packages(),
     zip_safe=False,
     install_requires=[
+        'Django',
         'paramiko',
     ],
     classifiers=[

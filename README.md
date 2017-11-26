@@ -1,26 +1,26 @@
-# Django Deployer
+# Django SSH Deployer
 
 This package provides Django management commands to deploy your site to various instances (develop, stage, production) over SSH via Paramiko.
 
 ## Pre-Requisites
 
-With great power comes great responsibility! Target servers (`DJANGO_DEPLOYER_INSTANCES['instance']['servers']`) must each have `git` and `virtualenv` installed, and support Linux-style OS commands. Target servers must have a user (`DJANGO_DEPLOYER_INSTANCES['instance']['server_user']`) with keys set up from the control machine where you run the Django command from. This typically means installing the control machine account's public key into the target server's user account's `AUTHORIZED_KEYS`.
+With great power comes great responsibility! Target servers (`DEPLOYER_INSTANCES['instance']['servers']`) must each have `git` and `virtualenv` installed, and support Linux-style OS commands. Target servers must have a user (`DEPLOYER_INSTANCES['instance']['server_user']`) with keys set up from the control machine where you run the Django command from. This typically means installing the control machine account's public key into the target server's user account's `AUTHORIZED_KEYS`.
 
 ## Installation and Required Django Settings
 
 Install via pip into your development environment:
 
 ```bash
-pip install django-deployer
+pip install django-ssh-deployer
 ```
 
-Then add `django_deployer` to your `INSTALLED_APPS`. Next, we need to configure your instances in Django's settings; these can live in your development settings, as they won't be required by production.
+Then add `django_ssh_deployer` to your `INSTALLED_APPS`. Next, we need to configure your instances in Django's settings; these can live in your development settings, as they won't be required by production.
 
 ```python
-DJANGO_DEPLOYER_INSTANCES = {
+DEPLOYER_INSTANCES = {
     'develop': {
-        'name': 'django-deployer',
-        'repository': 'git@github.com:FlipperPA/django-deployer.git',
+        'name': 'django-ssh-deployer',
+        'repository': 'git@github.com:FlipperPA/django-ssh-deployer.git',
         'branch': 'develop',
         'settings': 'config.settings.develop',
         'requirements': 'requirements/develop.txt',
@@ -31,8 +31,8 @@ DJANGO_DEPLOYER_INSTANCES = {
         'server_user': 'deploy_user',
     },
     'production': {
-        'name': 'django-deployer',
-        'repository': 'git@github.com:FlipperPA/django-deployer.git',
+        'name': 'django-ssh-deployer',
+        'repository': 'git@github.com:FlipperPA/django-ssh-deployer.git',
         'branch': 'master',
         'settings': 'config.settings.master',
         'requirements': 'requirements/master.txt',
@@ -62,9 +62,9 @@ DJANGO_DEPLOYER_INSTANCES = {
 python manage.py deploy --instance=develop
 ```
 
-* `instance`: Required. The name of the instance to deploy in `DJANGO_DEPLOYER_INSTANCES`. In the example above, either `develop` or `production`.
+* `instance`: Required. The name of the instance to deploy in `DEPLOYER_INSTANCES`. In the example above, either `develop` or `production`.
 * `quiet`: Less verbose output. Does not display the output of the commands being run to the terminal.
-* `stamp`: By default, Django Deployer will append a datetime stamp to each code clone and virtualenv. This overrides the datetime default.
+* `stamp`: By default, Django SSH Deployer will append a datetime stamp to each code clone and virtualenv. This overrides the datetime default.
 
 ## What It Does
 
