@@ -21,7 +21,7 @@ class Command(BaseCommand):
             action='store',
             dest='instance',
             default=None,
-            help='''The instance from DJANGO_PUBLISHER_INSTANCES to publish.'''
+            help='''The instance from DJANGO_DEPLOYER_INSTANCES to deploy.'''
         )
         parser.add_argument(
             '--quiet',
@@ -53,7 +53,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """
-        Gets the appropriate settings from Django and publishes the repository
+        Gets the appropriate settings from Django and deployes the repository
         to the target servers for the instance selected.
         """
         # Grab the quiet settings and unique stamp
@@ -61,17 +61,17 @@ class Command(BaseCommand):
         stamp = options['stamp']
 
         # Check to ensure the require setting is in Django's settings.
-        if hasattr(settings, 'DJANGO_PUBLISHER_INSTANCES'):
-            instances = settings.DJANGO_PUBLISHER_INSTANCES
+        if hasattr(settings, 'DJANGO_DEPLOYER_INSTANCES'):
+            instances = settings.DJANGO_DEPLOYER_INSTANCES
         else:
-            raise CommandError('You have not configured DJANGO_PUBLISHER_INSTANCES in your Django settings.')
+            raise CommandError('You have not configured DJANGO_DEPLOYER_INSTANCES in your Django settings.')
 
         # Grab the instance settings if they're properly set
         if options['instance'] in instances:
             instance = instances[options['instance']]
         else:
             raise CommandError(
-                'The instance name you provided ("{instance}") is not configured in your settings DJANGO_PUBLISHER_INSTANCES. Valid instance names are: {instances}'.format(
+                'The instance name you provided ("{instance}") is not configured in your settings DJANGO_DEPLOYER_INSTANCES. Valid instance names are: {instances}'.format(
                     instance=options['instance'],
                     instances=', '.join(list(instances.keys())),
                 )
@@ -141,7 +141,7 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
-            print("Updating the code and virtualenv symlinks for the new publish...")
+            print("Updating the code and virtualenv symlinks for the new deploy...")
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 ln -sfn {install_code_path_stamp} {install_code_path}

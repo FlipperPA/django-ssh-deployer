@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 setup(
-    name='django-publisher',
+    name='django-deployer',
     version="0.1dev0",
-    description='This package provides Django management commands to publish your site over SSH via Paramiko.',
-    long_description='This package provides Django management commands to publish your site over SSH via Paramiko.',
+    description='This package provides Django management commands to deploy your site over SSH via Paramiko.',
+    long_description='This package provides Django management commands to deploy your site over SSH via Paramiko.',
     author='Tim Allen',
     author_email='tim@pyphilly.org',
-    url='https://github.com/FlipperPA/django-publisher',
+    url='https://github.com/FlipperPA/django-deployer',
     include_package_data=True,
     packages=find_packages(),
     zip_safe=False,
