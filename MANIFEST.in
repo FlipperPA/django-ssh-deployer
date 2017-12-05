@@ -1,2 +1,3 @@
 include README.md
-recursive-include django_ssh_deployer *
+global-exclude __pycache__
+global-exclude *.py[co]

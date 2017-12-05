@@ -181,4 +181,24 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
+            if int(instance.get('save_deploys', 0)) > 0:
+                print(
+                    "Keeping the {} most recent deployments, and deleting the rest...".format(
+                        instance['save_deploys'],
+                    )
+                )
+
+                for path in (instance['code_path'], instance['virtualenv_path']):
+                    stdin, stdout, stderr = ssh.exec_command(
+                        """
+                        ls -1trd {path}/{name}-{branch}* | head -n -{save_deploys} | xargs -d '\\n' rm -rf --
+                        """.format(
+                            path=path,
+                            name=instance['name'],
+                            branch=instance['branch'],
+                            save_deploys=instance['save_deploys'] + 1,
+                        )
+                    )
+                    self.command_output(stdout, stderr, quiet)
+
         print("All done!")

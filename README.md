@@ -29,6 +29,7 @@ DEPLOYER_INSTANCES = {
         'virtualenv_python_path': '/usr/bin/python3.6',
         'servers': ['devserver.example.com'],
         'server_user': 'deploy_user',
+        'save_deploys': 3,
     },
     'production': {
         'name': 'django-ssh-deployer',
@@ -41,6 +42,7 @@ DEPLOYER_INSTANCES = {
         'virtualenv_python_path': '/usr/bin/python3.6',
         'servers': ['prodserver1.example.com', 'prodserver2.example.com'],
         'server_user': 'deploy_user',
+        'save_deploys': 3,
     },
 }
 ```
@@ -55,6 +57,7 @@ DEPLOYER_INSTANCES = {
 * `virtualenv_python_path`: The full path to the version of Python for the `virtualenv` to use on the target servers.
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
+* `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
 
 ## Running the Command
 

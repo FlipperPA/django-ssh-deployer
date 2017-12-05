@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='django-ssh-deployer',
-    version="0.1dev0",
+    version="0.1.1",
     description='This package provides Django management commands to deploy your site over SSH via Paramiko.',
     long_description='This package provides Django management commands to deploy your site over SSH via Paramiko.',
     author='Tim Allen',
