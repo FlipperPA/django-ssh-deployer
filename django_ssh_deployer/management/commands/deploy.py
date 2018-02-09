@@ -99,7 +99,7 @@ class Command(BaseCommand):
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 cd {code_path}
-                git clone --verbose -b {branch} {repository} {name}-{branch}-{stamp}
+                git clone --recursive --verbose -b {branch} {repository} {name}-{branch}-{stamp}
                 ln -sfn {name}-{branch}-{stamp} {name}-{branch}
                 """.format(
                     code_path=instance['code_path'],
