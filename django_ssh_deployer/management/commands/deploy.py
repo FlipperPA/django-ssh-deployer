@@ -28,14 +28,14 @@ class Command(BaseCommand):
             action='store',
             dest='quiet',
             default=False,
-            help='''Shuts off not quiet output.'''
+            help='''Sets quiet mode with minimal output.'''
         )
         parser.add_argument(
             '--stamp',
             action='store',
             dest='stamp',
             default='{0:%Y-%m-%d-%H-%M-%S}'.format(datetime.datetime.now()),
-            help='''Shuts off not quiet output.'''
+            help='''Overrides the default timestamp used for the deployment.'''
         )
 
     def command_output(self, stdout, stderr, quiet):
