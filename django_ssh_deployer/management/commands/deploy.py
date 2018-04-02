@@ -47,12 +47,14 @@ class Command(BaseCommand):
         """
         if not quiet:
             output = stdout.read().decode("utf-8").strip()
-            print('OUTPUT LENGTH: ', len(output))
             if len(output):
                 print(output)
         else:
             stdout.read()
-        print(stderr.read().decode("utf-8"))
+
+        err = stderr.read().decode("utf-8")
+        if len(err):
+            print(err)
 
     def handle(self, *args, **options):
         """
