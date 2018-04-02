@@ -47,7 +47,7 @@ class Command(BaseCommand):
         """
         if not quiet:
             output = stdout.read().decode("utf-8").strip()
-
+            print('OUTPUT LENGTH: ', len(output))
             if len(output):
                 print(output)
         else:
