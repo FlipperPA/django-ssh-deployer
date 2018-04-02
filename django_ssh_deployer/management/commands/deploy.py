@@ -94,6 +94,17 @@ class Command(BaseCommand):
             print("You did not type 'yes' - aborting.")
             return
 
+        name_branch_stamp = '{name}-{branch}-{stamp}'.format(
+            name=instance['name'],
+            branch=instance['branch'],
+            stamp=stamp,
+        )
+
+        install_code_path_stamp = os.path.join(
+            instance['code_path'],
+            name_branch_stamp,
+        )
+
         for index, server in enumerate(instance['servers']):
             print("Preparing code and virtualenv on node: {}...".format(server))
 
@@ -128,16 +139,6 @@ class Command(BaseCommand):
             self.command_output(stdout, stderr, quiet)
 
             print("Installing requirements in a new virtualenv, collecting static files, and running migrations...")
-            name_branch_stamp = '{name}-{branch}-{stamp}'.format(
-                name=instance['name'],
-                branch=instance['branch'],
-                stamp=stamp,
-            )
-
-            install_code_path_stamp = os.path.join(
-                instance['code_path'],
-                name_branch_stamp,
-            )
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
@@ -158,9 +159,12 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
+        for index, server in enumerate(instance['servers']):
+            print("Running migrations and updating symlinks on node: {}...".format(server))
+
             # Only run migrations when we're on the last server.
-            if index + 1 == len(instance['servers']):
-                print("Running migrations, since we have deployed to all server.")
+            if index == 0:
+                print("Running migrations...")
                 stdin, stdout, stderr = ssh.exec_command(
                     """
                     cd {virtualenv_path}
@@ -175,9 +179,6 @@ class Command(BaseCommand):
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
-
-        for server in instance['servers']:
-            print("Updating the code and virtualenv symlinks on node: {}...".format(server))
 
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
