@@ -90,8 +90,12 @@ class Command(BaseCommand):
             return
 
         for index, server in enumerate(instance['servers']):
-            print(index, len(instance['servers']))
             print("Preparing code and virtualenv on node: {}...".format(server))
+
+            # Make sure the code_path and virtualenv_path directories exist
+            for directory in (instance['code_path'], instance['virtualenv_path']):
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
 
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
@@ -121,7 +125,6 @@ class Command(BaseCommand):
                 cd {install_code_path_stamp}
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
-                python manage.py migrate --noinput --settings={settings}
                 """.format(
                     virtualenv_path=instance['virtualenv_path'],
                     virtualenv_python_path=instance['virtualenv_python_path'],
@@ -141,6 +144,17 @@ class Command(BaseCommand):
                 )
             )
             self.command_output(stdout, stderr, quiet)
+
+            # Only run migrations when we're on the last server.
+            if index + 1 == len(instance['servers']):
+                stdin, stdout, stderr = ssh.exec_command(
+                    """
+                    python manage.py migrate --noinput --settings={settings}
+                    """.format(
+                        settings=instance['settings'],
+                    )
+                )
+                self.command_output(stdout, stderr, quiet)
 
         for server in instance['servers']:
             print("Updating the code and virtualenv symlinks on node: {}...".format(server))
