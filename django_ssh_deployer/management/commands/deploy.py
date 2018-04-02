@@ -126,6 +126,15 @@ class Command(BaseCommand):
             self.command_output(stdout, stderr, quiet)
 
             print("Installing requirements in a new virtualenv, collecting static files, and running migrations...")
+            install_code_path_stamp = os.path.join(
+                instance['code_path'],
+                '{name}-{branch}-{stamp}'.format(
+                    name=instance['name'],
+                    branch=instance['branch'],
+                    stamp=stamp,
+                ),
+            )
+
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 cd {virtualenv_path}
@@ -140,14 +149,7 @@ class Command(BaseCommand):
                     name=instance['name'],
                     branch=instance['branch'],
                     stamp=stamp,
-                    install_code_path_stamp=os.path.join(
-                        instance['code_path'],
-                        '{name}-{branch}-{stamp}'.format(
-                            name=instance['name'],
-                            branch=instance['branch'],
-                            stamp=stamp,
-                        ),
-                    ),
+                    install_code_path_stamp=install_code_path_stamp,
                     requirements=instance['requirements'],
                     settings=instance['settings'],
                 )
@@ -156,10 +158,13 @@ class Command(BaseCommand):
 
             # Only run migrations when we're on the last server.
             if index + 1 == len(instance['servers']):
+                print("Running migrations, since we have deployed to all server.")
                 stdin, stdout, stderr = ssh.exec_command(
                     """
+                    cd {install_code_path_stamp}
                     python manage.py migrate --noinput --settings={settings}
                     """.format(
+                        install_code_path_stamp=install_code_path_stamp,
                         settings=instance['settings'],
                     )
                 )
