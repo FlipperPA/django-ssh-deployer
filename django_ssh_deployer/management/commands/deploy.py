@@ -89,8 +89,9 @@ class Command(BaseCommand):
             print("You did not type 'yes' - aborting.")
             return
 
-        for server in instance['servers']:
-            print("Connecting to {}...".format(server))
+        for index, server in enumerate(instance['servers']):
+            print(index, len(instance['servers']))
+            print("Preparing code and virtualenv on node: {}...".format(server))
 
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
@@ -141,7 +142,13 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
-            print("Updating the code and virtualenv symlinks for the new deployment...")
+        for server in instance['servers']:
+            print("Updating the code and virtualenv symlinks on node: {}...".format(server))
+
+            ssh = SSHClient()
+            ssh.set_missing_host_key_policy(AutoAddPolicy())
+            ssh.connect(server, username=instance['server_user'])
+
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 ln -sfn {install_code_path_stamp} {install_code_path}
@@ -183,8 +190,9 @@ class Command(BaseCommand):
 
             if int(instance.get('save_deploys', 0)) > 0:
                 print(
-                    "Keeping the {} most recent deployments, and deleting the rest...".format(
+                    "Keeping the {} most recent deployments, and deleting the rest on node: {}".format(
                         instance['save_deploys'],
+                        server,
                     )
                 )
 
