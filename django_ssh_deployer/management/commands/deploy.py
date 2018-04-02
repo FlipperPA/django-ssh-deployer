@@ -126,29 +126,29 @@ class Command(BaseCommand):
             self.command_output(stdout, stderr, quiet)
 
             print("Installing requirements in a new virtualenv, collecting static files, and running migrations...")
+            name_branch_stamp = '{name}-{branch}-{stamp}'.format(
+                name=instance['name'],
+                branch=instance['branch'],
+                stamp=stamp,
+            )
+
             install_code_path_stamp = os.path.join(
                 instance['code_path'],
-                '{name}-{branch}-{stamp}'.format(
-                    name=instance['name'],
-                    branch=instance['branch'],
-                    stamp=stamp,
-                ),
+                name_branch_stamp,
             )
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 cd {virtualenv_path}
-                virtualenv --python={virtualenv_python_path} {name}-{branch}-{stamp}
-                . {name}-{branch}-{stamp}/bin/activate
+                virtualenv --python={virtualenv_python_path} {name_branch_stamp}
+                . {name_branch_stamp}/bin/activate
                 cd {install_code_path_stamp}
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
                 """.format(
                     virtualenv_path=instance['virtualenv_path'],
                     virtualenv_python_path=instance['virtualenv_python_path'],
-                    name=instance['name'],
-                    branch=instance['branch'],
-                    stamp=stamp,
+                    name_branch_stamp=name_branch_stamp,
                     install_code_path_stamp=install_code_path_stamp,
                     requirements=instance['requirements'],
                     settings=instance['settings'],
@@ -161,9 +161,13 @@ class Command(BaseCommand):
                 print("Running migrations, since we have deployed to all server.")
                 stdin, stdout, stderr = ssh.exec_command(
                     """
+                    cd {virtualenv_path}
+                    . {name_branch_stamp}/bin/activate
                     cd {install_code_path_stamp}
                     python manage.py migrate --noinput --settings={settings}
                     """.format(
+                        virtualenv_path=instance['virtualenv_path'],
+                        name_branch_stamp=name_branch_stamp,
                         install_code_path_stamp=install_code_path_stamp,
                         settings=instance['settings'],
                     )
