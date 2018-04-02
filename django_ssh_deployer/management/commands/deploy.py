@@ -13,7 +13,7 @@ class Command(BaseCommand):
     Why not use inspectdb? It doesn't have enough options; this will be broken
     down by schema / product.
     """
-    help = 'This command will copy the database from one environment to another. BE CAREFUL!'
+    help = 'This command will deploy your Django site via SSH as a user. BE CAREFUL!'
 
     def add_arguments(self, parser):
         parser.add_argument(
