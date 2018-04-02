@@ -92,14 +92,20 @@ class Command(BaseCommand):
         for index, server in enumerate(instance['servers']):
             print("Preparing code and virtualenv on node: {}...".format(server))
 
-            # Make sure the code_path and virtualenv_path directories exist
-            for directory in (instance['code_path'], instance['virtualenv_path']):
-                if not os.path.exists(directory):
-                    os.makedirs(directory)
-
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(server, username=instance['server_user'])
+
+            # Make sure the code_path and virtualenv_path directories exist
+            for directory in (instance['code_path'], instance['virtualenv_path']):
+                stdin, stdout, stderr = ssh.exec_command(
+                    """
+                    mkdir -p {directory}
+                    """.format(
+                        directory=directory,
+                    )
+                )
+                self.command_output(stdout, stderr, quiet)
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
