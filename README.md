@@ -85,6 +85,19 @@ The `deploy` command will SSH to each server in `servers` as the `server_user`, 
 * Your repository's host must be in your target server's known hosts list, as git checkouts over SSH require an initial fingerprint.
 * This is not meant to be a replacement for a fully featured continous integration product, like Jenkins.
 
+## Release Notes
+
+### 0.2.0
+
+* Refactored to prepare code and virtualenvs on all nodes, then change the symlinks on a second pass through. This drastically cuts down the amount of potential time the code is out of sync across nodes.
+* Migrations are only run on the first node, run before the symlinks are changed, again minimize the time code and database are out of sync.
+* Ensure the base directories for `code_path` and `virtualenvpath` exist or can be created by the `deploy_user`.
+
+
+### 0.1.0
+
+* Initial release
+
 ## Contributors
 
 * Timothy Allen (https://github.com/FlipperPA)
