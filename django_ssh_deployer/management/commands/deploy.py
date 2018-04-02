@@ -46,7 +46,10 @@ class Command(BaseCommand):
         Output the errors, even in quiet mode.
         """
         if not quiet:
-            print(stdout.read().decode("utf-8"))
+            output = stdout.read().decode("utf-8").strip()
+
+            if len(output):
+                print(output)
         else:
             stdout.read()
         print(stderr.read().decode("utf-8"))
