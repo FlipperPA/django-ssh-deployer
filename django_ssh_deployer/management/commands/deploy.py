@@ -127,7 +127,6 @@ class Command(BaseCommand):
                 """
                 cd {code_path}
                 git clone --recursive --verbose -b {branch} {repository} {name}-{branch}-{stamp}
-                ln -sfn {name}-{branch}-{stamp} {name}-{branch}
                 """.format(
                     code_path=instance['code_path'],
                     name=instance['name'],
