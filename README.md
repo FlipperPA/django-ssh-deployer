@@ -93,6 +93,10 @@ The `deploy` command will SSH to each server in `servers` as the `server_user`, 
 * Migrations are only run on the first node, run before the symlinks are changed, again minimize the time code and database are out of sync.
 * Ensure the base directories for `code_path` and `virtualenvpath` exist or can be created by the `deploy_user`.
 
+#### 0.2.1
+
+* Fix a bug where a redundant symlink was being overwritten, creating unnecessary time where the database might be out of sync with code on nodes.
+* Update long description with Markdown for the awesome new PyPI interface.
 
 ### 0.1.0
 
