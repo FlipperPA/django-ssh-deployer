@@ -1,6 +1,6 @@
 # Django SSH Deployer
 
-This package provides Django management commands to deploy your site to various instances (develop, stage, production) over SSH via Paramiko.
+This package provides a Django management command to deploy your site to various instances (develop, stage, production) over SSH via Paramiko.
 
 ## Pre-Requisites
 
@@ -8,7 +8,7 @@ With great power comes great responsibility! Target servers (`DEPLOYER_INSTANCES
 
 ## Installation and Required Django Settings
 
-Install via pip into your development environment:
+Install via `pip` into your development environment:
 
 ```bash
 pip install django-ssh-deployer
@@ -64,17 +64,22 @@ python manage.py deploy --instance=develop
 
 * `instance`: Required. The name of the instance to deploy in `DEPLOYER_INSTANCES`. In the example above, either `develop` or `production`.
 * `quiet`: Less verbose output. Does not display the output of the commands being run to the terminal.
-* `stamp`: By default, Django SSH Deployer will append a datetime stamp to each code clone and virtualenv. This overrides the datetime default.
+* `stamp`: By default, Django SSH Deployer will append a datetime stamp to the `git clone`. This overrides the datetime default.
 
 ## What It Does
 
-The `deploy` command will SSH to each server in `servers` as the `server_user`, and perform the following functions:
+The `deploy` command will SSH to each server in `servers` as the `server_user`, and perform the following functions in two passes.
+
+First, it will connect to each server and prepare the new deployment:
 
 * clone the repository from git with a stamp
 * create a `venv` with a stamp
 * run the `collectstatic` command
-* run the `migrate` command
-* create a symlink to point to the completed deploy
+
+After the deployment has been prepared on all servers without error, it will proceed to the final deployment steps:
+
+* run the `migrate` command on the first server only
+* create or update the symlink to point to the completed deploy on each server
 
 ## Known Limitations and Issues
 
