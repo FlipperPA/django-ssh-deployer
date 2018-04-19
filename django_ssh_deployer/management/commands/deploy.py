@@ -112,16 +112,15 @@ class Command(BaseCommand):
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(server, username=instance['server_user'])
 
-            # Make sure the code_path and virtualenv_path directories exist
-            for directory in (instance['code_path'], instance['virtualenv_path']):
-                stdin, stdout, stderr = ssh.exec_command(
-                    """
-                    mkdir -p {directory}
-                    """.format(
-                        directory=directory,
-                    )
+            # Make sure the code_path directory exists
+            stdin, stdout, stderr = ssh.exec_command(
+                """
+                mkdir -p {directory}
+                """.format(
+                    directory=instance['code_path'],
                 )
-                self.command_output(stdout, stderr, quiet)
+            )
+            self.command_output(stdout, stderr, quiet)
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
@@ -137,21 +136,18 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
-            print("Installing requirements in a new virtualenv, collecting static files, and running migrations...")
+            print("Installing requirements in a new venv, collecting static files, and running migrations...")
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
-                cd {virtualenv_path}
-                virtualenv --python={virtualenv_python_path} {name_branch_stamp}
-                . {name_branch_stamp}/bin/activate
                 cd {install_code_path_stamp}
+                {venv_python_path} -m venv venv
+                . venv/bin/activate
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
                 """.format(
-                    virtualenv_path=instance['virtualenv_path'],
-                    virtualenv_python_path=instance['virtualenv_python_path'],
-                    name_branch_stamp=name_branch_stamp,
                     install_code_path_stamp=install_code_path_stamp,
+                    venv_python_path=instance['venv_python_path'],
                     requirements=instance['requirements'],
                     settings=instance['settings'],
                 )
@@ -166,13 +162,10 @@ class Command(BaseCommand):
                 print("Running migrations...")
                 stdin, stdout, stderr = ssh.exec_command(
                     """
-                    cd {virtualenv_path}
-                    . {name_branch_stamp}/bin/activate
                     cd {install_code_path_stamp}
+                    . venv/bin/activate
                     python manage.py migrate --noinput --settings={settings}
                     """.format(
-                        virtualenv_path=instance['virtualenv_path'],
-                        name_branch_stamp=name_branch_stamp,
                         install_code_path_stamp=install_code_path_stamp,
                         settings=instance['settings'],
                     )
@@ -186,7 +179,6 @@ class Command(BaseCommand):
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 ln -sfn {install_code_path_stamp} {install_code_path}
-                ln -sfn {install_virtualenv_path_stamp} {install_virtualenv_path}
                 """.format(
                     install_code_path_stamp=os.path.join(
                         instance['code_path'],
@@ -198,21 +190,6 @@ class Command(BaseCommand):
                     ),
                     install_code_path=os.path.join(
                         instance['code_path'],
-                        '{name}-{branch}'.format(
-                            name=instance['name'],
-                            branch=instance['branch'],
-                        ),
-                    ),
-                    install_virtualenv_path_stamp=os.path.join(
-                        instance['virtualenv_path'],
-                        '{name}-{branch}-{stamp}'.format(
-                            name=instance['name'],
-                            branch=instance['branch'],
-                            stamp=stamp,
-                        ),
-                    ),
-                    install_virtualenv_path=os.path.join(
-                        instance['virtualenv_path'],
                         '{name}-{branch}'.format(
                             name=instance['name'],
                             branch=instance['branch'],
@@ -230,17 +207,16 @@ class Command(BaseCommand):
                     )
                 )
 
-                for path in (instance['code_path'], instance['virtualenv_path']):
-                    stdin, stdout, stderr = ssh.exec_command(
-                        """
-                        ls -1trd {path}/{name}-{branch}* | head -n -{save_deploys} | xargs -d '\\n' rm -rf --
-                        """.format(
-                            path=path,
-                            name=instance['name'],
-                            branch=instance['branch'],
-                            save_deploys=instance['save_deploys'] + 1,
-                        )
+                stdin, stdout, stderr = ssh.exec_command(
+                    """
+                    ls -1trd {path}/{name}-{branch}* | head -n -{save_deploys} | xargs -d '\\n' rm -rf --
+                    """.format(
+                        path=instance['code_path'],
+                        name=instance['name'],
+                        branch=instance['branch'],
+                        save_deploys=instance['save_deploys'] + 1,
                     )
-                    self.command_output(stdout, stderr, quiet)
+                )
+                self.command_output(stdout, stderr, quiet)
 
         print("All done!")

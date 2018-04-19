@@ -25,8 +25,7 @@ DEPLOYER_INSTANCES = {
         'settings': 'config.settings.develop',
         'requirements': 'requirements/develop.txt',
         'code_path': '/var/django/sites',
-        'virtualenv_path': '/var/django/virtualenvs',
-        'virtualenv_python_path': '/usr/bin/python3.6',
+        'venv_python_path': '/usr/bin/python3.6',
         'servers': ['devserver.example.com'],
         'server_user': 'deploy_user',
         'save_deploys': 3,
@@ -38,8 +37,7 @@ DEPLOYER_INSTANCES = {
         'settings': 'config.settings.master',
         'requirements': 'requirements/master.txt',
         'code_path': '/var/django/sites',
-        'virtualenv_path': '/var/django/virtualenvs',
-        'virtualenv_python_path': '/usr/bin/python3.6',
+        'venv_python_path': '/usr/bin/python3.6',
         'servers': ['prodserver1.example.com', 'prodserver2.example.com'],
         'server_user': 'deploy_user',
         'save_deploys': 3,
@@ -53,8 +51,7 @@ DEPLOYER_INSTANCES = {
 * `settings`: A full path to the Django settings for the instnace.
 * `requirements`: A relative path to a `requirements` file to be `pip install`'d for the instance.
 * `code_path`: The root path for your code repository to be checked out to on the target servers.
-* `virtualenv_path`: The root path for your `virtualenv` to be created on the target servers.
-* `virtualenv_python_path`: The full path to the version of Python for the `virtualenv` to use on the target servers.
+* `venv_python_path`: The full path to the version of Python for the `venv` to use on the target servers.
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
 * `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
@@ -74,10 +71,10 @@ python manage.py deploy --instance=develop
 The `deploy` command will SSH to each server in `servers` as the `server_user`, and perform the following functions:
 
 * clone the repository from git with a stamp
-* create a `virtualenv` with a stamp
+* create a `venv` with a stamp
 * run the `collectstatic` command
 * run the `migrate` command
-* create symlinks to point to the completed deploy
+* create a symlink to point to the completed deploy
 
 ## Known Limitations and Issues
 
@@ -86,6 +83,12 @@ The `deploy` command will SSH to each server in `servers` as the `server_user`, 
 * This is not meant to be a replacement for a fully featured continous integration product, like Jenkins.
 
 ## Release Notes
+
+### 0.3.0
+
+* `virtualenv` has been deprecated in favor of `venv`, which ships with Python 3.3+. If you need support for `virtualenv`, please use the latest release from the 0.2 family.
+* To simplify, `virtualenv_path` is not longer supported as an option. The `venv` will be created at the root of the project.
+* The setting `virtualenv_python_path`, which points to the Python executable to build the `venv`, has been renamed to `venv_python_path` for consistency.
 
 ### 0.2.0
 
