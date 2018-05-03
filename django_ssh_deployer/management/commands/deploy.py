@@ -154,6 +154,27 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
+            if 'selinux' in instance and instance['selinux']:
+                print("Setting security context for RedHat / CentOS SELinux...")
+
+                stdin, stdout, stderr = ssh.exec_command(
+                    """
+                    chcon -Rv --type=httpd_sys_content_t {install_code_path_stamp}
+                    find {install_code_path_stamp}/venv/ -name "*.so" -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \;
+                    """.format(
+                        install_code_path_stamp=install_code_path_stamp,
+                    )
+                )
+                self.command_output(stdout, stderr, quiet)
+                print(stdout)
+                print(
+                    """
+                    chcon -Rv --type=httpd_sys_content_t {install_code_path_stamp}
+                    find {install_code_path_stamp}/venv/ -name "*.so" -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \;
+                    """.format(
+                        install_code_path_stamp=install_code_path_stamp,
+                    )
+                )
         for index, server in enumerate(instance['servers']):
             print("Running migrations and updating symlinks on node: {}...".format(server))
 
