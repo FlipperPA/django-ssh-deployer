@@ -29,6 +29,7 @@ DEPLOYER_INSTANCES = {
         'servers': ['devserver.example.com'],
         'server_user': 'deploy_user',
         'save_deploys': 3,
+        'selinux': False,
     },
     'production': {
         'name': 'your-project',
@@ -41,6 +42,7 @@ DEPLOYER_INSTANCES = {
         'servers': ['prodserver-1.example.com', 'prodserver-2.example.com'],
         'server_user': 'deploy_user',
         'save_deploys': 3,
+        'selinux': True,
     },
 }
 ```
@@ -55,6 +57,7 @@ DEPLOYER_INSTANCES = {
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
 * `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
+* `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for RedHat / CentOS SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
 
 ## Running the Command
 
@@ -88,6 +91,10 @@ After the deployment has been prepared on all servers without error, it will pro
 * This is not meant to be a replacement for a fully featured continous integration product, like Jenkins.
 
 ## Release Notes
+
+### 0.4.0
+
+* SELinux is now supported. When a publish occurs, the proper security context is set for the published files and venv.
 
 #### 0.3.1
 
