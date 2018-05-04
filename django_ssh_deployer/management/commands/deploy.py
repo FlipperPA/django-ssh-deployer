@@ -166,15 +166,14 @@ class Command(BaseCommand):
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
-                print(stdout)
-                print(
-                    """
-                    chcon -Rv --type=httpd_sys_content_t {install_code_path_stamp}
-                    find {install_code_path_stamp}/venv/ -name "*.so" -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \;
-                    """.format(
-                        install_code_path_stamp=install_code_path_stamp,
-                    )
-                )
+
+            if 'additional_commands' in instance:
+                print("Performing defined additional commands...")
+                for additional_command in instance['additional_commands']:
+                    print("Running '{}'...".format(additional_command))
+                    stdin, stdout, stderr = ssh.exec_command(additional_command)
+                    self.command_output(stdout, stderr, quiet)
+
         for index, server in enumerate(instance['servers']):
             print("Running migrations and updating symlinks on node: {}...".format(server))
 
