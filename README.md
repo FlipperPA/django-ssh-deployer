@@ -43,6 +43,10 @@ DEPLOYER_INSTANCES = {
         'server_user': 'deploy_user',
         'save_deploys': 3,
         'selinux': True,
+	'additional_commands': [
+            "chmod -R a+rX /var/django/sites/your-project-master",
+            "curl -kLs -o /dev/null --max-time 5 --resolve 'your-domain.com:443:127.0.0.1' https://your-domain.com/",
+        ],
     },
 }
 ```
@@ -58,6 +62,7 @@ DEPLOYER_INSTANCES = {
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
 * `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
 * `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for RedHat / CentOS SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
+* `additional_commands`: A list of commands to run after the deployment is complete.
 
 ## Running the Command
 
