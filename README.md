@@ -60,9 +60,9 @@ DEPLOYER_INSTANCES = {
 * `venv_python_path`: The full path to the version of Python for the `venv` to use on the target servers.
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
-* `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
-* `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for RedHat / CentOS SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
-* `additional_commands`: A list of commands to run after the deployment is complete.
+* (optional) `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
+* (optional) `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for RedHat / CentOS SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
+* (optional) `additional_commands`: A list of commands to run after the deployment is complete.
 
 ## Running the Command
 
@@ -96,6 +96,10 @@ After the deployment has been prepared on all servers without error, it will pro
 * This is not meant to be a replacement for a fully featured continous integration product, like Jenkins.
 
 ## Release Notes
+
+#### 0.4.1
+
+* Add ability to run commands per-environment after the publish is complete. These will be the last thing run before migrations. This is handy for things like required `chmod` changes, or `curl` calls.
 
 ### 0.4.0
 
