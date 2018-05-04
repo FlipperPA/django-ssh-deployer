@@ -106,11 +106,12 @@ class Command(BaseCommand):
         )
 
         for index, server in enumerate(instance['servers']):
-            print("Preparing code and virtualenv on node: {}...".format(server))
-
+            # Open an SSH connection to the server
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(server, username=instance['server_user'])
+
+            print("Preparing code and virtualenv on node: {}...".format(server))
 
             # Make sure the code_path directory exists
             stdin, stdout, stderr = ssh.exec_command(
@@ -167,47 +168,20 @@ class Command(BaseCommand):
                 )
                 self.command_output(stdout, stderr, quiet)
 
-            if 'additional_commands' in instance:
-                print("Performing defined additional commands...")
-                for additional_command in instance['additional_commands']:
-                    print("Running '{}'...".format(additional_command))
-                    stdin, stdout, stderr = ssh.exec_command(additional_command)
-                    self.command_output(stdout, stderr, quiet)
-
         for index, server in enumerate(instance['servers']):
-            print("Running migrations and updating symlinks on node: {}...".format(server))
-
-            # Only run migrations when we're on the last server.
-            if index == 0:
-                print("Running migrations...")
-                stdin, stdout, stderr = ssh.exec_command(
-                    """
-                    cd {install_code_path_stamp}
-                    . venv/bin/activate
-                    python manage.py migrate --noinput --settings={settings}
-                    """.format(
-                        install_code_path_stamp=install_code_path_stamp,
-                        settings=instance['settings'],
-                    )
-                )
-                self.command_output(stdout, stderr, quiet)
-
+            # Open an SSH connection to the server
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(server, username=instance['server_user'])
+
+            print("")
+            print("Updating symlinks and running any additional defined commands on node: {}...".format(server))
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 ln -sfn {install_code_path_stamp} {install_code_path}
                 """.format(
-                    install_code_path_stamp=os.path.join(
-                        instance['code_path'],
-                        '{name}-{branch}-{stamp}'.format(
-                            name=instance['name'],
-                            branch=instance['branch'],
-                            stamp=stamp,
-                        ),
-                    ),
+                    install_code_path_stamp=install_code_path_stamp,
                     install_code_path=os.path.join(
                         instance['code_path'],
                         '{name}-{branch}'.format(
@@ -217,6 +191,7 @@ class Command(BaseCommand):
                     ),
                 )
             )
+
             self.command_output(stdout, stderr, quiet)
 
             if int(instance.get('save_deploys', 0)) > 0:
@@ -235,6 +210,28 @@ class Command(BaseCommand):
                         name=instance['name'],
                         branch=instance['branch'],
                         save_deploys=instance['save_deploys'] + 1,
+                    )
+                )
+                self.command_output(stdout, stderr, quiet)
+
+            if 'additional_commands' in instance:
+                print("Performing defined additional commands...")
+                for additional_command in instance['additional_commands']:
+                    print("Running '{}'...".format(additional_command))
+                    stdin, stdout, stderr = ssh.exec_command(additional_command)
+                    self.command_output(stdout, stderr, quiet)
+
+            # Only run migrations when we're on the last server.
+            if index + 1 == len(instance['servers']):
+                print("Finally, running migrations...")
+                stdin, stdout, stderr = ssh.exec_command(
+                    """
+                    cd {install_code_path_stamp}
+                    . venv/bin/activate
+                    python manage.py migrate --noinput --settings={settings}
+                    """.format(
+                        install_code_path_stamp=install_code_path_stamp,
+                        settings=instance['settings'],
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
