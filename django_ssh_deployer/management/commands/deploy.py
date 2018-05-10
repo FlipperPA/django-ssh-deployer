@@ -161,7 +161,7 @@ class Command(BaseCommand):
                 stdin, stdout, stderr = ssh.exec_command(
                     """
                     chcon -Rv --type=httpd_sys_content_t {install_code_path_stamp}
-                    find {install_code_path_stamp}/venv/ -name "*.so" -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \;
+                    find {install_code_path_stamp}/venv/ \( -name "*.so" -o -name "*.so.*" \) -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \;
                     """.format(
                         install_code_path_stamp=install_code_path_stamp,
                     )
