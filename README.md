@@ -97,6 +97,10 @@ After the deployment has been prepared on all servers without error, it will pro
 
 ## Release Notes
 
+#### 0.4.2
+
+* Add support for additional `.so` file patterns that may be installed with `pip` for SELinux.
+
 #### 0.4.1
 
 * Add ability to run commands per-environment after the publish is complete. These will be the last thing run before migrations. This is handy for things like required `chmod` changes, or `curl` calls.
