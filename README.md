@@ -61,7 +61,7 @@ DEPLOYER_INSTANCES = {
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
 * (optional) `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
-* (optional) `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for RedHat / CentOS SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
+* (optional) `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
 * (optional) `additional_commands`: A list of commands to run after the deployment is complete.
 
 ## Running the Command
