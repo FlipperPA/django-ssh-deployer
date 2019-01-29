@@ -139,27 +139,23 @@ class Command(BaseCommand):
 
             print("Installing requirements in a new venv, collecting static files, and running migrations...")
 
+            pip_text = ""
+            if "upgrade_pip" in instance and instance["upgrade_pip"]:
+                print("pip will be upgraded to the latest version...")
+                pip_text = "pip install -U pip"
+
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 cd {install_code_path_stamp}
                 {venv_python_path} -m venv venv
                 . venv/bin/activate
-                """.format(
-                    install_code_path_stamp=install_code_path_stamp,
-                    venv_python_path=instance["venv_python_path"],
-                    requirements=instance["requirements"],
-                    settings=instance["settings"],
-                )
-            )
-
-            if "upgrade_pip" in instance and instance["upgrade_pip"]:
-                stdin, stdout, stderr = ssh.exec_command("pip install -U pip")
-
-            stdin, stdout, stderr = ssh.exec_command(
-                """
+                {pip_text}
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
                 """.format(
+                    install_code_path_stamp=install_code_path_stamp,
+                    venv_python_path=instance["venv_python_path"],
+                    pip_text=pip_text,
                     requirements=instance["requirements"],
                     settings=instance["settings"],
                 )

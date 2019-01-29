@@ -100,6 +100,10 @@ After the deployment has been prepared on all servers without error, it will pro
 
 ## Release Notes
 
+#### 0.4.3
+
+* Add `upgrade_pip` option to upgrade pip in the destination venv to the latest version.
+
 #### 0.4.2
 
 * Add support for additional `.so` file patterns that may be installed with `pip` for SELinux.
