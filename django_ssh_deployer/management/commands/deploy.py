@@ -152,7 +152,7 @@ class Command(BaseCommand):
                 )
             )
 
-            if instance["upgrade_pip"]:
+            if "upgrade_pip" in instance and instance["upgrade_pip"]:
                 stdin, stdout, stderr = ssh.exec_command("pip install -U pip")
 
             stdin, stdout, stderr = ssh.exec_command(
