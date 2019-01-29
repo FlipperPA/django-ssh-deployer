@@ -62,8 +62,8 @@ class Command(BaseCommand):
         to the target servers for the instance selected.
         """
         # Grab the quiet settings and unique stamp
-        quiet = options['quiet']
-        stamp = options['stamp']
+        quiet = options["quiet"]
+        stamp = options["stamp"]
 
         # Check to ensure the require setting is in Django's settings.
         if hasattr(settings, 'DEPLOYER_INSTANCES'):
@@ -72,20 +72,20 @@ class Command(BaseCommand):
             raise CommandError('You have not configured DEPLOYER_INSTANCES in your Django settings.')
 
         # Grab the instance settings if they're properly set
-        if options['instance'] in instances:
-            instance = instances[options['instance']]
+        if options["instance"] in instances:
+            instance = instances[options["instance"]]
         else:
             raise CommandError(
                 'The instance name you provided ("{instance}") is not configured in your settings DEPLOYER_INSTANCES. Valid instance names are: {instances}'.format(
-                    instance=options['instance'],
+                    instance=options["instance"],
                     instances=', '.join(list(instances.keys())),
                 )
             )
 
         print(
             "We are about to deploy the instance '{instance}' to the following servers: {servers}.".format(
-                instance=options['instance'],
-                servers=', '.join(instance['servers']),
+                instance=options["instance"],
+                servers=', '.join(instance["servers"]),
             )
         )
         verify = input('Are you sure you want to do this (enter "yes" to proceed)? ')
@@ -95,21 +95,21 @@ class Command(BaseCommand):
             return
 
         name_branch_stamp = '{name}-{branch}-{stamp}'.format(
-            name=instance['name'],
-            branch=instance['branch'],
+            name=instance["name"],
+            branch=instance["branch"],
             stamp=stamp,
         )
 
         install_code_path_stamp = os.path.join(
-            instance['code_path'],
+            instance["code_path"],
             name_branch_stamp,
         )
 
-        for index, server in enumerate(instance['servers']):
+        for index, server in enumerate(instance["servers"]):
             # Open an SSH connection to the server
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
-            ssh.connect(server, username=instance['server_user'])
+            ssh.connect(server, username=instance["server_user"])
 
             print("Preparing code and virtualenv on node: {}...".format(server))
 
@@ -118,7 +118,7 @@ class Command(BaseCommand):
                 """
                 mkdir -p {directory}
                 """.format(
-                    directory=instance['code_path'],
+                    directory=instance["code_path"],
                 )
             )
             self.command_output(stdout, stderr, quiet)
@@ -128,10 +128,10 @@ class Command(BaseCommand):
                 cd {code_path}
                 git clone --recursive --verbose -b {branch} {repository} {name}-{branch}-{stamp}
                 """.format(
-                    code_path=instance['code_path'],
-                    name=instance['name'],
-                    branch=instance['branch'],
-                    repository=instance['repository'],
+                    code_path=instance["code_path"],
+                    name=instance["name"],
+                    branch=instance["branch"],
+                    repository=instance["repository"],
                     stamp=stamp,
                 )
             )
@@ -144,18 +144,29 @@ class Command(BaseCommand):
                 cd {install_code_path_stamp}
                 {venv_python_path} -m venv venv
                 . venv/bin/activate
+                """.format(
+                    install_code_path_stamp=install_code_path_stamp,
+                    venv_python_path=instance["venv_python_path"],
+                    requirements=instance["requirements"],
+                    settings=instance["settings"],
+                )
+            )
+
+            if instance["upgrade_pip"]:
+                stdin, stdout, stderr = ssh.exec_command("pip install -U pip")
+
+            stdin, stdout, stderr = ssh.exec_command(
+                """
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
                 """.format(
-                    install_code_path_stamp=install_code_path_stamp,
-                    venv_python_path=instance['venv_python_path'],
-                    requirements=instance['requirements'],
-                    settings=instance['settings'],
+                    requirements=instance["requirements"],
+                    settings=instance["settings"],
                 )
             )
             self.command_output(stdout, stderr, quiet)
 
-            if 'selinux' in instance and instance['selinux']:
+            if 'selinux' in instance and instance["selinux"]:
                 print("Setting security context for RedHat / CentOS SELinux...")
 
                 stdin, stdout, stderr = ssh.exec_command(
@@ -168,11 +179,11 @@ class Command(BaseCommand):
                 )
                 self.command_output(stdout, stderr, quiet)
 
-        for index, server in enumerate(instance['servers']):
+        for index, server in enumerate(instance["servers"]):
             # Open an SSH connection to the server
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
-            ssh.connect(server, username=instance['server_user'])
+            ssh.connect(server, username=instance["server_user"])
 
             print("")
             print("Updating symlinks and running any additional defined commands on node: {}...".format(server))
@@ -183,10 +194,10 @@ class Command(BaseCommand):
                 """.format(
                     install_code_path_stamp=install_code_path_stamp,
                     install_code_path=os.path.join(
-                        instance['code_path'],
+                        instance["code_path"],
                         '{name}-{branch}'.format(
-                            name=instance['name'],
-                            branch=instance['branch'],
+                            name=instance["name"],
+                            branch=instance["branch"],
                         ),
                     ),
                 )
@@ -197,7 +208,7 @@ class Command(BaseCommand):
             if int(instance.get('save_deploys', 0)) > 0:
                 print(
                     "Keeping the {} most recent deployments, and deleting the rest on node: {}".format(
-                        instance['save_deploys'],
+                        instance["save_deploys"],
                         server,
                     )
                 )
@@ -206,23 +217,23 @@ class Command(BaseCommand):
                     """
                     ls -1trd {path}/{name}-{branch}* | head -n -{save_deploys} | xargs -d '\\n' rm -rf --
                     """.format(
-                        path=instance['code_path'],
-                        name=instance['name'],
-                        branch=instance['branch'],
-                        save_deploys=instance['save_deploys'] + 1,
+                        path=instance["code_path"],
+                        name=instance["name"],
+                        branch=instance["branch"],
+                        save_deploys=instance["save_deploys"] + 1,
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
 
             if 'additional_commands' in instance:
                 print("Performing defined additional commands...")
-                for additional_command in instance['additional_commands']:
+                for additional_command in instance["additional_commands"]:
                     print("Running '{}'...".format(additional_command))
                     stdin, stdout, stderr = ssh.exec_command(additional_command)
                     self.command_output(stdout, stderr, quiet)
 
             # Only run migrations when we're on the last server.
-            if index + 1 == len(instance['servers']):
+            if index + 1 == len(instance["servers"]):
                 print("Finally, running migrations...")
                 stdin, stdout, stderr = ssh.exec_command(
                     """
@@ -231,7 +242,7 @@ class Command(BaseCommand):
                     python manage.py migrate --noinput --settings={settings}
                     """.format(
                         install_code_path_stamp=install_code_path_stamp,
-                        settings=instance['settings'],
+                        settings=instance["settings"],
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
