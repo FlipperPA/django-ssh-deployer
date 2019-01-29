@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='django-ssh-deployer',
-    version="0.4.2",
+    version="0.4.3",
     description='This package provides Django management commands to deploy your site over SSH via Paramiko.',
     long_description=long_description,
     long_description_content_type='text/markdown',
