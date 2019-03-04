@@ -9,9 +9,8 @@ from paramiko import SSHClient, AutoAddPolicy
 
 class Command(BaseCommand):
     """
-    This command will create Django models by introspecting the PostgreSQL data.
-    Why not use inspectdb? It doesn't have enough options; this will be broken
-    down by schema / product.
+    This command will deploy a Django site to a set or servers over SSH using
+    paramiko.
     """
     help = 'This command will deploy your Django site via SSH as a user. BE CAREFUL!'
 
@@ -105,6 +104,8 @@ class Command(BaseCommand):
             name_branch_stamp,
         )
 
+        # On our first iteration, we clone the repository, build the virtual
+        # environment, and collect static files; this may take some time.
         for index, server in enumerate(instance["servers"]):
             # Open an SSH connection to the server
             ssh = SSHClient()
@@ -167,14 +168,16 @@ class Command(BaseCommand):
 
                 stdin, stdout, stderr = ssh.exec_command(
                     """
-                    chcon -Rv --type=httpd_sys_content_t {install_code_path_stamp}
-                    find {install_code_path_stamp}/venv/ \( -name "*.so" -o -name "*.so.*" \) -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \;
+                    chcon -Rv --type=httpd_sys_content_t {install_code_path_stamp} > /dev/null
+                    find {install_code_path_stamp}/venv/ \( -name "*.so" -o -name "*.so.*" \) -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \; > /dev/null
                     """.format(
                         install_code_path_stamp=install_code_path_stamp,
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
 
+        # On our second iteration, we update symlinks, keep only recent deployments,
+        # run any additional command, and run migrations. This should be fast.
         for index, server in enumerate(instance["servers"]):
             # Open an SSH connection to the server
             ssh = SSHClient()
