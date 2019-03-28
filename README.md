@@ -73,9 +73,10 @@ DEPLOYER_INSTANCES = {
 python manage.py deploy --instance=develop
 ```
 
-* `instance`: Required. The name of the instance to deploy in `DEPLOYER_INSTANCES`. In the example above, either `develop` or `production`.
-* `quiet`: Less verbose output. Does not display the output of the commands being run to the terminal.
-* `stamp`: By default, Django SSH Deployer will append a datetime stamp to the `git clone`. This overrides the datetime default.
+* `--instance`: Required. The name of the instance to deploy in `DEPLOYER_INSTANCES`. In the example above, either `develop` or `production`.
+* `--quiet`: Less verbose output. Does not display the output of the commands being run to the terminal.
+* `--no-confirm`: Publishes without a confirmation step. Be careful!
+* `--stamp`: By default, Django SSH Deployer will append a datetime stamp to the `git clone`. This overrides the datetime default.
 
 ## What It Does
 
@@ -99,6 +100,10 @@ After the deployment has been prepared on all servers without error, it will pro
 * This is not meant to be a replacement for a fully featured continous integration product, like Jenkins.
 
 ## Release Notes
+
+#### 0.4.4
+
+* Add a `--no-confirm` command line option for publishing without confirmation. Be careful!
 
 #### 0.4.3
 
