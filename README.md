@@ -101,9 +101,13 @@ After the deployment has been prepared on all servers without error, it will pro
 
 ## Release Notes
 
-#### 0.4.4
+#### 0.4.5
 
 * Add a `--no-confirm` command line option for publishing without confirmation. Be careful!
+
+#### 0.4.4
+
+* Pipe output from security context switches to /dev/null by default.
 
 #### 0.4.3
 
