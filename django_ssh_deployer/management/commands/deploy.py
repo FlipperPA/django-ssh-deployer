@@ -30,6 +30,13 @@ class Command(BaseCommand):
             help='''Sets quiet mode with minimal output.'''
         )
         parser.add_argument(
+            '--no-confirm',
+            action='store',
+            dest='no_confirm',
+            default=False,
+            help='''Publishes without confirmation: be careful!'''
+        )
+        parser.add_argument(
             '--stamp',
             action='store',
             dest='stamp',
@@ -63,6 +70,7 @@ class Command(BaseCommand):
         # Grab the quiet settings and unique stamp
         quiet = options["quiet"]
         stamp = options["stamp"]
+        no_confirm = options["no_confirm"]
 
         # Check to ensure the require setting is in Django's settings.
         if hasattr(settings, 'DEPLOYER_INSTANCES'):
@@ -87,7 +95,10 @@ class Command(BaseCommand):
                 servers=', '.join(instance["servers"]),
             )
         )
-        verify = input('Are you sure you want to do this (enter "yes" to proceed)? ')
+        if no_confirm:
+            verify = "yes"
+        else:
+            verify = input('Are you sure you want to do this (enter "yes" to proceed)? ')
 
         if verify.lower() != 'yes':
             print("You did not type 'yes' - aborting.")
