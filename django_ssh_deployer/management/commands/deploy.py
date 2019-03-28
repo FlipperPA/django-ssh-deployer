@@ -24,14 +24,14 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--quiet',
-            action='store',
+            action='store_true',
             dest='quiet',
             default=False,
             help='''Sets quiet mode with minimal output.'''
         )
         parser.add_argument(
             '--no-confirm',
-            action='store',
+            action='store_true',
             dest='no_confirm',
             default=False,
             help='''Publishes without confirmation: be careful!'''
