@@ -12,36 +12,37 @@ class Command(BaseCommand):
     This command will deploy a Django site to a set or servers over SSH using
     paramiko.
     """
-    help = 'This command will deploy your Django site via SSH as a user. BE CAREFUL!'
+
+    help = "This command will deploy your Django site via SSH as a user. BE CAREFUL!"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--instance',
-            action='store',
-            dest='instance',
+            "--instance",
+            action="store",
+            dest="instance",
             default=None,
-            help='''The instance from DEPLOYER_INSTANCES to deploy.'''
+            help="""The instance from DEPLOYER_INSTANCES to deploy.""",
         )
         parser.add_argument(
-            '--quiet',
-            action='store_true',
-            dest='quiet',
+            "--quiet",
+            action="store_true",
+            dest="quiet",
             default=False,
-            help='''Sets quiet mode with minimal output.'''
+            help="""Sets quiet mode with minimal output.""",
         )
         parser.add_argument(
-            '--no-confirm',
-            action='store_true',
-            dest='no_confirm',
+            "--no-confirm",
+            action="store_true",
+            dest="no_confirm",
             default=False,
-            help='''Publishes without confirmation: be careful!'''
+            help="""Publishes without confirmation: be careful!""",
         )
         parser.add_argument(
-            '--stamp',
-            action='store',
-            dest='stamp',
-            default='{0:%Y-%m-%d-%H-%M-%S}'.format(datetime.datetime.now()),
-            help='''Overrides the default timestamp used for the deployment.'''
+            "--stamp",
+            action="store",
+            dest="stamp",
+            default="{0:%Y-%m-%d-%H-%M-%S}".format(datetime.datetime.now()),
+            help="""Overrides the default timestamp used for the deployment.""",
         )
 
     def command_output(self, stdout, stderr, quiet):
@@ -73,10 +74,12 @@ class Command(BaseCommand):
         no_confirm = options["no_confirm"]
 
         # Check to ensure the require setting is in Django's settings.
-        if hasattr(settings, 'DEPLOYER_INSTANCES'):
+        if hasattr(settings, "DEPLOYER_INSTANCES"):
             instances = settings.DEPLOYER_INSTANCES
         else:
-            raise CommandError('You have not configured DEPLOYER_INSTANCES in your Django settings.')
+            raise CommandError(
+                "You have not configured DEPLOYER_INSTANCES in your Django settings."
+            )
 
         # Grab the instance settings if they're properly set
         if options["instance"] in instances:
@@ -85,35 +88,31 @@ class Command(BaseCommand):
             raise CommandError(
                 'The instance name you provided ("{instance}") is not configured in your settings DEPLOYER_INSTANCES. Valid instance names are: {instances}'.format(
                     instance=options["instance"],
-                    instances=', '.join(list(instances.keys())),
+                    instances=", ".join(list(instances.keys())),
                 )
             )
 
         print(
             "We are about to deploy the instance '{instance}' to the following servers: {servers}.".format(
-                instance=options["instance"],
-                servers=', '.join(instance["servers"]),
+                instance=options["instance"], servers=", ".join(instance["servers"])
             )
         )
         if no_confirm:
             verify = "yes"
         else:
-            verify = input('Are you sure you want to do this (enter "yes" to proceed)? ')
+            verify = input(
+                'Are you sure you want to do this (enter "yes" to proceed)? '
+            )
 
-        if verify.lower() != 'yes':
+        if verify.lower() != "yes":
             print("You did not type 'yes' - aborting.")
             return
 
-        name_branch_stamp = '{name}-{branch}-{stamp}'.format(
-            name=instance["name"],
-            branch=instance["branch"],
-            stamp=stamp,
+        name_branch_stamp = "{name}-{branch}-{stamp}".format(
+            name=instance["name"], branch=instance["branch"], stamp=stamp
         )
 
-        install_code_path_stamp = os.path.join(
-            instance["code_path"],
-            name_branch_stamp,
-        )
+        install_code_path_stamp = os.path.join(instance["code_path"], name_branch_stamp)
 
         # On our first iteration, we clone the repository, build the virtual
         # environment, and collect static files; this may take some time.
@@ -130,7 +129,7 @@ class Command(BaseCommand):
                 """
                 mkdir -p {directory}
                 """.format(
-                    directory=instance["code_path"],
+                    directory=instance["code_path"]
                 )
             )
             self.command_output(stdout, stderr, quiet)
@@ -149,7 +148,9 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
-            print("Installing requirements in a new venv, collecting static files, and running migrations...")
+            print(
+                "Installing requirements in a new venv, collecting static files, and running migrations..."
+            )
 
             pip_text = ""
             if "upgrade_pip" in instance and instance["upgrade_pip"]:
@@ -174,7 +175,7 @@ class Command(BaseCommand):
             )
             self.command_output(stdout, stderr, quiet)
 
-            if 'selinux' in instance and instance["selinux"]:
+            if "selinux" in instance and instance["selinux"]:
                 print("Setting security context for RedHat / CentOS SELinux...")
 
                 stdin, stdout, stderr = ssh.exec_command(
@@ -182,7 +183,7 @@ class Command(BaseCommand):
                     chcon -Rv --type=httpd_sys_content_t {install_code_path_stamp} > /dev/null
                     find {install_code_path_stamp}/venv/ \( -name "*.so" -o -name "*.so.*" \) -exec chcon -Rv --type=httpd_sys_script_exec_t {{}} \; > /dev/null
                     """.format(
-                        install_code_path_stamp=install_code_path_stamp,
+                        install_code_path_stamp=install_code_path_stamp
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
@@ -196,7 +197,11 @@ class Command(BaseCommand):
             ssh.connect(server, username=instance["server_user"])
 
             print("")
-            print("Updating symlinks and running any additional defined commands on node: {}...".format(server))
+            print(
+                "Updating symlinks and running any additional defined commands on node: {}...".format(
+                    server
+                )
+            )
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
@@ -205,9 +210,8 @@ class Command(BaseCommand):
                     install_code_path_stamp=install_code_path_stamp,
                     install_code_path=os.path.join(
                         instance["code_path"],
-                        '{name}-{branch}'.format(
-                            name=instance["name"],
-                            branch=instance["branch"],
+                        "{name}-{branch}".format(
+                            name=instance["name"], branch=instance["branch"]
                         ),
                     ),
                 )
@@ -215,11 +219,10 @@ class Command(BaseCommand):
 
             self.command_output(stdout, stderr, quiet)
 
-            if int(instance.get('save_deploys', 0)) > 0:
+            if int(instance.get("save_deploys", 0)) > 0:
                 print(
                     "Keeping the {} most recent deployments, and deleting the rest on node: {}".format(
-                        instance["save_deploys"],
-                        server,
+                        instance["save_deploys"], server
                     )
                 )
 
@@ -235,7 +238,7 @@ class Command(BaseCommand):
                 )
                 self.command_output(stdout, stderr, quiet)
 
-            if 'additional_commands' in instance:
+            if "additional_commands" in instance:
                 print("Performing defined additional commands...")
                 for additional_command in instance["additional_commands"]:
                     print("Running '{}'...".format(additional_command))
