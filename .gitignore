@@ -47,7 +47,6 @@ Desktop.ini
 .vagrant
 
 # Ignore local configurations
-wrds/settings/local.py
 db.sqlite3
 
 # Node modules
