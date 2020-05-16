@@ -109,59 +109,7 @@ After the deployment has been prepared on all servers without error, it will pro
 
 ## Release Notes
 
-#### 0.5.0
-
-* Add option to customize git checkout path.
-    * To retain the current behavior, set `DEPLOYER_CLONE_DIR_FORMAT = "{name}-{branch}"` in your Django settings.
-
-#### 0.4.5
-
-* Add a `--no-confirm` command line option for publishing without confirmation. Be careful!
-
-#### 0.4.4
-
-* Pipe output from security context switches to /dev/null by default.
-
-#### 0.4.3
-
-* Add `upgrade_pip` option to upgrade pip in the destination venv to the latest version.
-
-#### 0.4.2
-
-* Add support for additional `.so` file patterns that may be installed with `pip` for SELinux.
-
-#### 0.4.1
-
-* Add ability to run commands per-environment after the publish is complete. These will be the last thing run before migrations. This is handy for things like required `chmod` changes, or `curl` calls.
-
-### 0.4.0
-
-* SELinux is now supported. When a publish occurs, the proper security context is set for the published files and venv.
-
-#### 0.3.1
-
-* Some documentation touch ups.
-
-### 0.3.0
-
-* `virtualenv` has been deprecated in favor of `venv`, which ships with Python 3.3+. If you need support for `virtualenv`, please use the latest release from the 0.2 family.
-* To simplify, `virtualenv_path` is not longer supported as an option. The `venv` will be created at the root of the project.
-* The setting `virtualenv_python_path`, which points to the Python executable to build the `venv`, has been renamed to `venv_python_path` for consistency.
-
-#### 0.2.1
-
-* Fix a bug where a redundant symlink was being overwritten, creating unnecessary time where the database might be out of sync with code on nodes.
-* Update long description with Markdown for the awesome new PyPI interface.
-
-### 0.2.0
-
-* Refactored to prepare code and virtualenvs on all nodes, then change the symlinks on a second pass through. This drastically cuts down the amount of potential time the code is out of sync across nodes.
-* Migrations are only run on the first node, run before the symlinks are changed, again minimize the time code and database are out of sync.
-* Ensure the base directories for `code_path` and `virtualenvpath` exist or can be created by the `deploy_user`.
-
-### 0.1.0
-
-* Initial release
+[Release notes are available on GitHub.](https://github.com/FlipperPA/django-ssh-deployer/releases)
 
 ## Contributors
 

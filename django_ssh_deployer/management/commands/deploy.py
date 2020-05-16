@@ -116,17 +116,17 @@ class Command(BaseCommand):
             "DEPLOYER_CLONE_DIR_FORMAT",
             "{name}-{instance}",
         )
-        deployer_checkout_dir = deployer_clone_dir_format.format(
+        deployer_clone_dir = deployer_clone_dir_format.format(
             instance=options["instance"],
             name=instance["name"],
             branch=instance["branch"],
             server_user=instance["server_user"],
         )
-        git_dir_stamp = "{deployer_checkout_dir}-{stamp}".format(
-            deployer_checkout_dir=deployer_checkout_dir, stamp=stamp
+        git_dir_stamp = "{deployer_clone_dir}-{stamp}".format(
+            deployer_clone_dir=deployer_clone_dir, stamp=stamp
         )
         install_code_path = os.path.join(
-            instance["code_path"], deployer_checkout_dir,
+            instance["code_path"], deployer_clone_dir,
         )
         install_code_path_stamp = os.path.join(
             instance["code_path"], git_dir_stamp,
