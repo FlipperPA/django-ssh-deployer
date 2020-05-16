@@ -9,8 +9,7 @@ from paramiko import SSHClient, AutoAddPolicy
 
 class Command(BaseCommand):
     """
-    This command will deploy a Django site to a set or servers over SSH using
-    paramiko.
+    This command will deploy a Django site to a set or servers over SSH using paramiko.
     """
 
     help = "This command will deploy your Django site via SSH as a user. BE CAREFUL!"
@@ -86,14 +85,17 @@ class Command(BaseCommand):
             instance = instances[options["instance"]]
         else:
             raise CommandError(
-                'The instance name you provided ("{instance}") is not configured in your settings DEPLOYER_INSTANCES. Valid instance names are: {instances}'.format(
+                "The instance name you provided ('{instance}') is not configured in "
+                "your settings DEPLOYER_INSTANCES. Valid instance names are: "
+                "{instances}".format(
                     instance=options["instance"],
                     instances=", ".join(list(instances.keys())),
                 )
             )
 
         print(
-            "We are about to deploy the instance '{instance}' to the following servers: {servers}.".format(
+            "We are about to deploy the instance '{instance}' to the following "
+            "servers: {servers}.".format(
                 instance=options["instance"], servers=", ".join(instance["servers"])
             )
         )
@@ -101,18 +103,34 @@ class Command(BaseCommand):
             verify = "yes"
         else:
             verify = input(
-                'Are you sure you want to do this (enter "yes" to proceed)? '
+                "Are you sure you want to do this (enter 'yes' to proceed)? "
             )
 
         if verify.lower() != "yes":
             print("You did not type 'yes' - aborting.")
             return
 
-        name_branch_stamp = "{name}-{branch}-{stamp}".format(
-            name=instance["name"], branch=instance["branch"], stamp=stamp
+        # Variables for directory locations and symlinks
+        deployer_clone_dir_format = getattr(
+            settings,
+            "DEPLOYER_CLONE_DIR_FORMAT",
+            "{name}-{instance}",
         )
-
-        install_code_path_stamp = os.path.join(instance["code_path"], name_branch_stamp)
+        deployer_checkout_dir = deployer_clone_dir_format.format(
+            instance=options["instance"],
+            name=instance["name"],
+            branch=instance["branch"],
+            server_user=instance["server_user"],
+        )
+        git_dir_stamp = "{deployer_checkout_dir}-{stamp}".format(
+            deployer_checkout_dir=deployer_checkout_dir, stamp=stamp
+        )
+        install_code_path = os.path.join(
+            instance["code_path"], deployer_checkout_dir,
+        )
+        install_code_path_stamp = os.path.join(
+            instance["code_path"], git_dir_stamp,
+        )
 
         # On our first iteration, we clone the repository, build the virtual
         # environment, and collect static files; this may take some time.
@@ -137,19 +155,19 @@ class Command(BaseCommand):
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 cd {code_path}
-                git clone --recursive --verbose -b {branch} {repository} {name}-{branch}-{stamp}
+                git clone --recursive --verbose -b {branch} {repository} {git_dir_stamp}
                 """.format(
                     code_path=instance["code_path"],
-                    name=instance["name"],
                     branch=instance["branch"],
                     repository=instance["repository"],
-                    stamp=stamp,
+                    git_dir_stamp=git_dir_stamp,
                 )
             )
             self.command_output(stdout, stderr, quiet)
 
             print(
-                "Installing requirements in a new venv, collecting static files, and running migrations..."
+                "Installing requirements in a new venv, collecting static files, and "
+                "running migrations..."
             )
 
             pip_text = ""
@@ -198,7 +216,8 @@ class Command(BaseCommand):
 
             print("")
             print(
-                "Updating symlinks and running any additional defined commands on node: {}...".format(
+                "Updating symlinks and running any additional defined commands on "
+                "node: {}...".format(
                     server
                 )
             )
@@ -208,12 +227,7 @@ class Command(BaseCommand):
                 ln -sfn {install_code_path_stamp} {install_code_path}
                 """.format(
                     install_code_path_stamp=install_code_path_stamp,
-                    install_code_path=os.path.join(
-                        instance["code_path"],
-                        "{name}-{branch}".format(
-                            name=instance["name"], branch=instance["branch"]
-                        ),
-                    ),
+                    install_code_path=install_code_path,
                 )
             )
 
@@ -221,7 +235,8 @@ class Command(BaseCommand):
 
             if int(instance.get("save_deploys", 0)) > 0:
                 print(
-                    "Keeping the {} most recent deployments, and deleting the rest on node: {}".format(
+                    "Keeping the {} most recent deployments, and deleting the rest on "
+                    "node: {}".format(
                         instance["save_deploys"], server
                     )
                 )

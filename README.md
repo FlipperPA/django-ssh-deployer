@@ -67,6 +67,14 @@ DEPLOYER_INSTANCES = {
 * (optional) `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
 * (optional) `additional_commands`: A list of commands to run after the deployment is complete.
 
+Optionally, you can customize the directory created by the `git clone` in your Django settings:
+
+```
+DEPLOYER_CLONE_DIR_FORMAT = "{name}-{instance}"
+```
+
+The following keywords will be replaced in the checkout directory format: `instance`, `name`, `branch`, and `server_user`. The default is `"{name}-{instance}"`, which in the example above, would be `your-project-develop` and `your-project-production`.
+
 ## Running the Command
 
 ```bash
@@ -100,6 +108,11 @@ After the deployment has been prepared on all servers without error, it will pro
 * This is not meant to be a replacement for a fully featured continous integration product, like Jenkins.
 
 ## Release Notes
+
+#### 0.5.0
+
+* Add option to customize git checkout path.
+    * To retain the current behavior, set `DEPLOYER_CLONE_DIR_FORMAT = "{name}-{branch}"` in your Django settings.
 
 #### 0.4.5
 
