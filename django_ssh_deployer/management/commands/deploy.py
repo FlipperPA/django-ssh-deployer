@@ -140,7 +140,7 @@ class Command(BaseCommand):
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(server, username=instance["server_user"])
 
-            print("Preparing code and virtualenv on node: {}...".format(server))
+            print("Cloning code and preparing venv on node: {}...".format(server))
 
             # Make sure the code_path directory exists
             stdin, stdout, stderr = ssh.exec_command(
@@ -166,8 +166,7 @@ class Command(BaseCommand):
             self.command_output(stdout, stderr, quiet)
 
             print(
-                "Installing requirements in a new venv, collecting static files, and "
-                "running migrations..."
+                "Installing requirements in a new venv and collecting static files..."
             )
 
             pip_text = ""
@@ -207,7 +206,7 @@ class Command(BaseCommand):
                 self.command_output(stdout, stderr, quiet)
 
         # On our second iteration, we update symlinks, keep only recent deployments,
-        # run any additional command, and run migrations. This should be fast.
+        # run any additional commands, and run migrations. This should be fast.
         for index, server in enumerate(instance["servers"]):
             # Open an SSH connection to the server
             ssh = SSHClient()
