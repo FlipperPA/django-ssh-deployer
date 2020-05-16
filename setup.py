@@ -5,8 +5,8 @@ with open("README.md") as f:
 
 setup(
     name="django-ssh-deployer",
-    version="0.4.5",
-    description="This package provides Django management commands to deploy your site over SSH via Paramiko.",
+    description="This package provides Django management commands to deploy your site "
+    "over SSH via Paramiko.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Tim Allen",
@@ -16,6 +16,8 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     install_requires=["Django", "paramiko",],
+    setup_requires=['setuptools_scm'],
+    use_scm_version=True,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
