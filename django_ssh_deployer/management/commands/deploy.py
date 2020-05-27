@@ -170,9 +170,11 @@ class Command(BaseCommand):
             )
 
             pip_text = ""
+            wheel_text = ""
             if "upgrade_pip" in instance and instance["upgrade_pip"]:
                 print("pip will be upgraded to the latest version...")
                 pip_text = "pip install -U pip"
+                wheel_text = "pip install -U wheel setuptools"
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
@@ -180,12 +182,14 @@ class Command(BaseCommand):
                 {venv_python_path} -m venv venv
                 . venv/bin/activate
                 {pip_text}
+                {wheel_text}
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
                 """.format(
                     install_code_path_stamp=install_code_path_stamp,
                     venv_python_path=instance["venv_python_path"],
                     pip_text=pip_text,
+                    wheel_text=wheel_text,
                     requirements=instance["requirements"],
                     settings=instance["settings"],
                 )
@@ -242,11 +246,9 @@ class Command(BaseCommand):
 
                 stdin, stdout, stderr = ssh.exec_command(
                     """
-                    ls -1trd {path}/{name}-{branch}* | head -n -{save_deploys} | xargs -d '\\n' rm -rf --
+                    ls -1trd {install_code_path}* | head -n -{save_deploys} | xargs -d '\\n' rm -rf --
                     """.format(
-                        path=instance["code_path"],
-                        name=instance["name"],
-                        branch=instance["branch"],
+                        install_code_path=install_code_path,
                         save_deploys=instance["save_deploys"] + 1,
                     )
                 )
