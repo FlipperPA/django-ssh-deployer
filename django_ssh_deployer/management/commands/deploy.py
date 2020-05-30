@@ -169,27 +169,26 @@ class Command(BaseCommand):
                 "Installing requirements in a new venv and collecting static files..."
             )
 
-            pip_text = ""
-            wheel_text = ""
-            if "upgrade_pip" in instance and instance["upgrade_pip"]:
-                print("pip will be upgraded to the latest version...")
-                pip_text = "pip install -U pip"
-                wheel_text = "pip install -U wheel setuptools"
+            pip_upgrade_text = "pip install -U pip"
+            if "upgrade_pip" in instance and instance["upgrade_pip"] is False:
+                pip_upgrade_text = ""
+                print("pip will NOT be upgraded.")
+            else:
+                print("pip will be upgraded to the latest version.")
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
                 cd {install_code_path_stamp}
                 {venv_python_path} -m venv venv
                 . venv/bin/activate
-                {pip_text}
-                {wheel_text}
+                {pip_upgrade_text}
+                pip install -U wheel
                 pip install --ignore-installed -r {requirements}
                 python manage.py collectstatic --noinput --settings={settings}
                 """.format(
                     install_code_path_stamp=install_code_path_stamp,
                     venv_python_path=instance["venv_python_path"],
-                    pip_text=pip_text,
-                    wheel_text=wheel_text,
+                    pip_upgrade_text=pip_upgrade_text,
                     requirements=instance["requirements"],
                     settings=instance["settings"],
                 )

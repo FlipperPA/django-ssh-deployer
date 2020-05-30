@@ -26,7 +26,7 @@ DEPLOYER_INSTANCES = {
         'requirements': 'requirements/develop.txt',
         'code_path': '/var/django/sites',
         'venv_python_path': '/usr/bin/python3.6',
-        'upgrade_pip': False,
+        'upgrade_pip': True,
         'servers': ['devserver.example.com'],
         'server_user': 'deploy_user',
         'save_deploys': 3,
@@ -40,7 +40,7 @@ DEPLOYER_INSTANCES = {
         'requirements': 'requirements/master.txt',
         'code_path': '/var/django/sites',
         'venv_python_path': '/usr/bin/python3.6',
-        'upgrade_pip': False,
+        'upgrade_pip': True,
         'servers': ['prodserver-1.example.com', 'prodserver-2.example.com'],
         'server_user': 'deploy_user',
         'save_deploys': 3,
@@ -60,7 +60,7 @@ DEPLOYER_INSTANCES = {
 * `requirements`: A relative path to a `requirements` file to be `pip install`'d for the instance.
 * `code_path`: The root path for your code repository to be checked out to on the target servers.
 * `venv_python_path`: The full path to the version of Python for the `venv` to use on the target servers.
-* `upgrade_pip`: If set to `True`, will upgrade `pip` to the latest version.
+* `upgrade_pip`: If set to `False`, will not upgrade `pip` to the latest version.
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
 * (optional) `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
