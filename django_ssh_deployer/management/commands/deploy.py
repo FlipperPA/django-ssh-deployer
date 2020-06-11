@@ -166,15 +166,25 @@ class Command(BaseCommand):
             self.command_output(stdout, stderr, quiet)
 
             print(
-                "Installing requirements in a new venv and collecting static files..."
+                "Preparing the installation..."
             )
 
-            pip_upgrade_text = "pip install -U pip"
-            if "upgrade_pip" in instance and instance["upgrade_pip"] is False:
+
+            if instance.get("upgrade_pip", True):
+                pip_upgrade_text = "pip install -U pip"                
+            else:
                 pip_upgrade_text = ""
                 print("pip will NOT be upgraded.")
+
+            if instance.get("collectstatic", True):
+                collectstatic_text = (
+                    "python manage.py collectstatic --noinput --settings={s}".format(
+                        s=settings,
+                    )
+                )
             else:
-                print("pip will be upgraded to the latest version.")
+                collectstatic_text = ""
+                print("Static files will NOT be collected.")
 
             stdin, stdout, stderr = ssh.exec_command(
                 """
@@ -184,13 +194,13 @@ class Command(BaseCommand):
                 {pip_upgrade_text}
                 pip install -U wheel
                 pip install --ignore-installed -r {requirements}
-                python manage.py collectstatic --noinput --settings={settings}
+                {collectstatic_text}
                 """.format(
                     install_code_path_stamp=install_code_path_stamp,
                     venv_python_path=instance["venv_python_path"],
                     pip_upgrade_text=pip_upgrade_text,
                     requirements=instance["requirements"],
-                    settings=instance["settings"],
+                    collectstatic_text=collectstatic_text,
                 )
             )
             self.command_output(stdout, stderr, quiet)
@@ -261,7 +271,7 @@ class Command(BaseCommand):
                     self.command_output(stdout, stderr, quiet)
 
             # Only run migrations when we're on the last server.
-            if index + 1 == len(instance["servers"]):
+            if index + 1 == len(instance["servers"]) and instance.get("migrate", True):
                 print("Finally, running migrations...")
                 stdin, stdout, stderr = ssh.exec_command(
                     """
@@ -274,5 +284,7 @@ class Command(BaseCommand):
                     )
                 )
                 self.command_output(stdout, stderr, quiet)
+            else:
+                print("Not running migrations; migrate is set to False.")
 
         print("All done!")

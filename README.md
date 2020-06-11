@@ -31,6 +31,8 @@ DEPLOYER_INSTANCES = {
         'server_user': 'deploy_user',
         'save_deploys': 3,
         'selinux': False,
+        'collectstatic': False,
+        'migrate': False,
     },
     'production': {
         'name': 'your-project',
@@ -61,6 +63,8 @@ DEPLOYER_INSTANCES = {
 * `code_path`: The root path for your code repository to be checked out to on the target servers.
 * `venv_python_path`: The full path to the version of Python for the `venv` to use on the target servers.
 * `upgrade_pip`: If set to `False`, will not upgrade `pip` to the latest version.
+* `collectstatic`: If set to `False`, will not collect static files.
+* `migrate`: If set to `False`, will not run migrations.
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
 * (optional) `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
