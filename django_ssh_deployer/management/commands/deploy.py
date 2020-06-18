@@ -179,7 +179,7 @@ class Command(BaseCommand):
             if instance.get("collectstatic", True):
                 collectstatic_text = (
                     "python manage.py collectstatic --noinput --settings={s}".format(
-                        s=settings,
+                        s=instance["settings"],
                     )
                 )
             else:
