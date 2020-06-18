@@ -18,12 +18,12 @@ Then add `django_ssh_deployer` to your `INSTALLED_APPS`. Next, we need to config
 
 ```python
 DEPLOYER_INSTANCES = {
-    "develop": {
+    "dev": {
         "name": "your-project",
         "repository": "git@github.com:youruser/your-project.git",
-        "branch": "develop",
-        "settings": "config.settings.develop",
-        "requirements": "requirements/develop.txt",
+        "branch": "dev",
+        "settings": "config.settings.dev",
+        "requirements": "requirements/dev.txt",
         "code_path": "/var/django/sites",
         "venv_python_path": "/usr/bin/python3",
         "upgrade_pip": True,
@@ -34,12 +34,12 @@ DEPLOYER_INSTANCES = {
         "collectstatic": False,
         "migrate": False,
     },
-    "production": {
+    "prod": {
         "name": "your-project",
         "repository": "git@github.com:youruser/your-project.git",
-        "branch": "master",
-        "settings": "config.settings.master",
-        "requirements": "requirements/master.txt",
+        "branch": "prod",
+        "settings": "config.settings.prod",
+        "requirements": "requirements/prod.txt",
         "code_path": "/var/django/sites",
         "venv_python_path": "/usr/bin/python3",
         "upgrade_pip": True,
@@ -62,11 +62,11 @@ DEPLOYER_INSTANCES = {
 * `requirements`: A relative path to a `requirements` file to be `pip install`'d for the instance.
 * `code_path`: The root path for your code repository to be checked out to on the target servers.
 * `venv_python_path`: The full path to the version of Python for the `venv` to use on the target servers.
-* `upgrade_pip`: If set to `False`, will not upgrade `pip` to the latest version.
-* `collectstatic`: If set to `False`, will not collect static files.
-* `migrate`: If set to `False`, will not run migrations.
 * `servers`: A list of servers to deploy the Django project to.
 * `server_user`: The user on the target servers which has been set up with keys from the control machine.
+* (optional) `upgrade_pip`: If set to `False`, will not upgrade `pip` to the latest version.
+* (optional) `collectstatic`: If set to `False`, will not collect static files.
+* (optional) `migrate`: If set to `False`, will not run migrations.
 * (optional) `save_deploys`: If a positive integer, will only keep the most recent number of deployments. By default, will keep all.
 * (optional) `selinux`: If set to True, the deployer will run `chcon` command to set the necessary security context on files for SELinux. It will set all files in the `codepath` to `httpd_sys_content_t`, and any `*.so` files in the `venv` to `httpd_sys_script_exec_t`.
 * (optional) `additional_commands`: A list of commands to run after the deployment is complete.
