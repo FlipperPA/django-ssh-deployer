@@ -48,7 +48,7 @@ DEPLOYER_INSTANCES = {
         "save_deploys": 3,
         "selinux": True,
         "additional_commands": [
-            "chmod -R a+rX /var/django/sites/your-project-master",
+            "chmod -R a+rX /var/django/sites/your-project-prod",
             "curl -kLs -o /dev/null --max-time 5 --resolve 'your-domain.com:443:127.0.0.1' https://your-domain.com/",
         ],
     },
