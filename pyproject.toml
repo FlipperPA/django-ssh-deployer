@@ -44,4 +44,4 @@ extend-select = ["I"]
 preview = true
 
 [tool.setuptools_scm]
-write_to = "config/_version.py"
+write_to = "_version.py"
