@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -61,6 +62,18 @@ class Command(BaseCommand):
         err = stderr.read().decode("utf-8")
         if len(err):
             print(err)
+
+    def stop(self, command, exit_status):
+        """
+        If we received a non-zero exit status, end the attempt to deploy.
+        """
+        print(f"Aborting: {command} failed with exit status {exit_status}.")
+        if exit_status == 128:
+            print(
+                "This likely means git was unable to connect via SSH, or is asking for "
+                "first-time host key verification."
+            )
+        sys.exit()
 
     def handle(self, *args, **options):
         """
@@ -143,13 +156,7 @@ class Command(BaseCommand):
             print("Cloning code and preparing venv on node: {}...".format(server))
 
             # Make sure the code_path directory exists
-            stdin, stdout, stderr = ssh.exec_command(
-                """
-                mkdir -p {directory}
-                """.format(
-                    directory=instance["code_path"]
-                )
-            )
+            stdin, stdout, stderr = ssh.exec_command('mkdir -p {instance["code_path"]}')
             self.command_output(stdout, stderr, quiet)
 
             stdin, stdout, stderr = ssh.exec_command(
@@ -163,7 +170,13 @@ class Command(BaseCommand):
                     git_dir_stamp=git_dir_stamp,
                 )
             )
+
             self.command_output(stdout, stderr, quiet)
+
+            exit_status = stdout.channel.recv_exit_status()
+
+            if exit_status:
+                self.stop("git", exit_status)
 
             print(
                 "Preparing the installation..."
@@ -185,25 +198,33 @@ class Command(BaseCommand):
             else:
                 collectstatic_text = ""
                 print("Static files will NOT be collected.")
+            
+            if "requirements" in instance:
+                install_cmd = (
+                    f"""pip install --ignore-installed -r {instance["requirements"]}"""
+                )
+            elif "pip_command" in instance:
+                install_cmd = f"""pip install {instance["pip_command"]}"""
+            else:
+                self.stop("django ssh deployer", 1)
 
             stdin, stdout, stderr = ssh.exec_command(
-                """
+                f"""
                 cd {install_code_path_stamp}
-                {venv_python_path} -m venv venv
+                {instance["venv_python_path"]} -m venv venv
                 . venv/bin/activate
                 {pip_upgrade_text}
                 pip install -U wheel
-                pip install --ignore-installed -r {requirements}
+                {install_cmd}
                 {collectstatic_text}
-                """.format(
-                    install_code_path_stamp=install_code_path_stamp,
-                    venv_python_path=instance["venv_python_path"],
-                    pip_upgrade_text=pip_upgrade_text,
-                    requirements=instance["requirements"],
-                    collectstatic_text=collectstatic_text,
-                )
+                """
             )
+            exit_status = stdout.channel.recv_exit_status()
+
             self.command_output(stdout, stderr, quiet)
+
+            if exit_status:
+                self.stop("pip", exit_status)
 
             if "selinux" in instance and instance["selinux"]:
                 print("Setting security context for RedHat / CentOS SELinux...")

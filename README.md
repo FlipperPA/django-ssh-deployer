@@ -23,7 +23,7 @@ DEPLOYER_INSTANCES = {
         "repository": "git@github.com:youruser/your-project.git",
         "branch": "dev",
         "settings": "config.settings.dev",
-        "requirements": "requirements/dev.txt",
+        "pip_command": "-e .[dev]",
         "code_path": "/var/django/sites",
         "venv_python_path": "/usr/bin/python3",
         "upgrade_pip": True,
@@ -59,7 +59,7 @@ DEPLOYER_INSTANCES = {
 * `repository`: The repository for your Django project, which will be cloned on each target server.
 * `branch`: The branch to check out for the instance.
 * `settings`: A full path to the Django settings for the instnace.
-* `requirements`: A relative path to a `requirements` file to be `pip install`'d for the instance.
+* `requirements` or `pip_command`: Either a relative path to a `requirements` file, or a pip path to be `pip install`'d for the instance.
 * `code_path`: The root path for your code repository to be checked out to on the target servers.
 * `venv_python_path`: The full path to the version of Python for the `venv` to use on the target servers.
 * `servers`: A list of servers to deploy the Django project to.
