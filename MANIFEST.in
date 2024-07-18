@@ -1,3 +1,0 @@
-include README.md
-global-exclude __pycache__
-global-exclude *.py[co]
